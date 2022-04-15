@@ -14,7 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
-function send_email() {
+function send_email(event) {
+  // https://cs50.stackexchange.com/questions/38645/cs50-web-programming-mail-pset-dom-reloading-on-every-form-submission?rq=1
+  event.preventDefault();
   let recipients = document.querySelector('#compose-recipients').value;
   let subject = document.querySelector('#compose-subject').value;
   let body = document.querySelector('#compose-body').value;
@@ -29,15 +31,16 @@ function send_email() {
   })
   .then(response => response.json())
   .then(result => {
-    print(result.error);
-    print(result.message);
+    if (result.error === undefined) {
+      alert(`Success : ${result.message}`);
+      load_mailbox('sent');
+    } else {
+      alert(`Error : ${result.error}`);
+    }
   })
   .catch(error => {
-    console.log("Error", error)
+    console.log("Error", error);
   });
-
-  load_mailbox('sent');
-  return false;
 }
 
 
@@ -61,4 +64,27 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  // Show emails in that particular mailbox
+  fetch(`/emails/${mailbox}`)
+  .then(response => response.json())
+  .then(emails => {
+    if (emails.error) {
+        alert(emails.error);
+    }
+
+    for (let each_email of emails) {
+      let email_line = document.createElement('div');
+      email_line.textContent = `${each_email.sender}    ${each_email.subject}   ${each_email.timestamp}`;
+      email_line.style.backgroundColor = "gray";
+      email_line.style.border = "thin solid #000000"
+      if (each_email.read === false) {
+        email_line.style.backgroundColor = "orange";
+      }
+      document.querySelector('#emails-view').append(email_line);
+    }
+
+
+  });
+
 }
