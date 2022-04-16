@@ -1,3 +1,11 @@
 textarea {
     min-height: 400px;
 }
+
+.mail_line {
+    display: grid;
+    background-color: gray;
+    border: thin solid black;
+    grid-template-columns: 25% auto 25%;
+    grid-template-rows: 100%;
+}
